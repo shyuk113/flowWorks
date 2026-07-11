@@ -2,5 +2,5 @@ package com.example.FlowWorks.department.application.dto;
 
 import com.example.FlowWorks.employee.domain.Employee;
 
-public record UpdateDepartmentHeadRequest(Long departmentId, Employee departmentHead) {
+public record UpdateDepartmentHeadRequest(Employee departmentHead) {
 }

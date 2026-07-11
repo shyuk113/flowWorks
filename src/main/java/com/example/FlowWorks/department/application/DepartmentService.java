@@ -26,8 +26,8 @@ public class DepartmentService {
 
     //부서 목록 조회
     @Transactional(readOnly = true)
-    public List<Department> getDepartments(){
-        return departmentRepository.findAll();
+    public List<DepartmentResponse> getDepartments(){
+        return departmentRepository.findAll().stream().map(DepartmentResponse::from).toList();
     }
 
     //부서 상세 조회
@@ -46,7 +46,9 @@ public class DepartmentService {
             throw new AccessDeniedException("부서 생성 권한이 없습니다.");
         }
 
-        Department department = Department.createDepartment(request.name(), request.departmentHead());
+        Employee departmentHead = employeeRepository.findById(request.departmentHeadId()).orElseThrow(()->new IllegalArgumentException("존재하지 않는 직원입니다."));
+
+        Department department = Department.createDepartment(request.name(), departmentHead);
         departmentRepository.save(department);
         return DepartmentResponse.from(department);
     }
@@ -59,11 +61,7 @@ public class DepartmentService {
             throw new AccessDeniedException("부서 생성 권한이 없습니다.");
         }
 
-        Department department = departmentRepository.findById(request.departmentId()).orElseThrow(()->new IllegalArgumentException("존재 하지 않는 부서입니다."));
-
-        if(!request.departmentId().equals(departmentId)){
-            throw new IllegalArgumentException("요청된 부서와 다른 부서입니다");
-        }
+        Department department = departmentRepository.findById(departmentId).orElseThrow(()->new IllegalArgumentException("존재 하지 않는 부서입니다."));
 
         department.updateDepartment(request.name());
     }
@@ -75,11 +73,7 @@ public class DepartmentService {
             throw new AccessDeniedException("부서 생성 권한이 없습니다.");
         }
 
-        Department department = departmentRepository.findById(request.departmentId()).orElseThrow(()->new IllegalArgumentException("존재 하지 않는 부서입니다."));
-
-        if(!request.departmentId().equals(departmentId)){
-            throw new IllegalArgumentException("요청된 부서와 다른 부서입니다");
-        }
+        Department department = departmentRepository.findById(departmentId).orElseThrow(()->new IllegalArgumentException("존재 하지 않는 부서입니다."));
 
         department.updateDepartmentHead(request.departmentHead());
     }
