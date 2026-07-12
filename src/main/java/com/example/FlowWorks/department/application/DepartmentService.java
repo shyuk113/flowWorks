@@ -76,6 +76,9 @@ public class DepartmentService {
 
         Department department = departmentRepository.findById(departmentId).orElseThrow(()->new IllegalArgumentException("존재 하지 않는 부서입니다."));
 
-        department.updateDepartmentHead(request.departmentHead());
+        Employee newDepartmentHead = employeeRepository.findById(request.departmentHeadId())
+                        .orElseThrow(()->new IllegalArgumentException("존재 하지 않는 직원입니다."));
+
+        department.updateDepartmentHead(newDepartmentHead);
     }
 }
