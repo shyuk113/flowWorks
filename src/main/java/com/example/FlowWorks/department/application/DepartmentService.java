@@ -66,6 +66,7 @@ public class DepartmentService {
         department.updateDepartment(request.name());
     }
 
+    //부서장 지정/변경
     @Transactional
     public void updateDepartmentHead(UpdateDepartmentHeadRequest request, Long departmentId, Long employeeId){
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 직원입니다."));
@@ -75,6 +76,9 @@ public class DepartmentService {
 
         Department department = departmentRepository.findById(departmentId).orElseThrow(()->new IllegalArgumentException("존재 하지 않는 부서입니다."));
 
-        department.updateDepartmentHead(request.departmentHead());
+        Employee newDepartmentHead = employeeRepository.findById(request.departmentHeadId())
+                        .orElseThrow(()->new IllegalArgumentException("존재 하지 않는 직원입니다."));
+
+        department.updateDepartmentHead(newDepartmentHead);
     }
 }
