@@ -19,6 +19,8 @@ public class DepartmentController {
 
     private final DepartmentService departmentService;
 
+    //TODO:임시 조치, Security 붙기 전까지
+
     //부서 목록 조회
     @GetMapping
     public ResponseEntity<List<DepartmentResponse>> getAllDepartments(){
