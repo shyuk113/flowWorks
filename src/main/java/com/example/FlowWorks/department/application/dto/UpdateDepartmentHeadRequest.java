@@ -1,6 +1,8 @@
 package com.example.FlowWorks.department.application.dto;
 
-import com.example.FlowWorks.employee.domain.Employee;
+import jakarta.validation.constraints.NotNull;
 
-public record UpdateDepartmentHeadRequest(Long departmentHeadId) {
+public record UpdateDepartmentHeadRequest(
+        @NotNull(message = "부서장을 지정해 주세요.")
+        Long departmentHeadId) {
 }
