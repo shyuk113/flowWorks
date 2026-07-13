@@ -4,6 +4,7 @@ import com.example.FlowWorks.rank.domain.Rank;
 import com.example.FlowWorks.team.domain.Team;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,5 +29,29 @@ public class Employee {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rank_id", nullable = false)
     private Rank rank;
+
+    @Builder
+    private Employee(String name, EmployeeStatus status, Team team, Rank rank) {
+        this.name = name;
+        this.status = status;
+        this.team = team;
+        this.rank = rank;
+    }
+
+    public static Employee createEmployee(String name, EmployeeStatus status, Team team, Rank rank) {
+        return Employee.builder()
+                .name(name)
+                .status(status)
+                .team(team)
+                .rank(rank)
+                .build();
+    }
+
+    public void updateEmployee(String name, EmployeeStatus status, Team team, Rank rank) {
+        this.name = name;
+        this.status = status;
+        this.team = team;
+        this.rank = rank;
+    }
 
 }
