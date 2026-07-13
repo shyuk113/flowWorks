@@ -34,8 +34,7 @@ public class EmployeeController {
     //직원 등록 (teamId, rankId 필수)
     @PostMapping
     public ResponseEntity<EmployeeResponse> createEmployee(@Valid @RequestBody CreateEmployeeRequest request, Long employeeId){
-        employeeService.createEmployee(request, employeeId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.createEmployee(request, employeeId));
     }
 
     //기본 정보 수정
