@@ -36,9 +36,8 @@ public class TeamController {
 
     //팀 생성
     @PostMapping
-    public ResponseEntity<Void> createTeam(@Valid @RequestBody CreateTeamRequest request, Long employeeId){
-        teamService.createTeam(request, employeeId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<TeamResponse> createTeam(@Valid @RequestBody CreateTeamRequest request, Long employeeId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(teamService.createTeam(request, employeeId));
     }
 
     //팀명 수정

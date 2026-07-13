@@ -7,6 +7,7 @@ import com.example.FlowWorks.department.application.dto.UpdateDepartmentHeadRequ
 import com.example.FlowWorks.department.application.dto.UpdateDepartmentRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,20 +37,20 @@ public class DepartmentController {
     //부서 생성
     @PostMapping
     public ResponseEntity<DepartmentResponse> createDepartment(@Valid @RequestBody CreateDepartmentRequest request, Long employeeId){
-        return ResponseEntity.ok(departmentService.addDepartment(request, employeeId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(departmentService.addDepartment(request, employeeId));
     }
 
     //부서명 등 기본 정보 수정
     @PatchMapping("/{id}")
     public ResponseEntity<Void>  updateDepartment(@PathVariable Long id,@Valid @RequestBody UpdateDepartmentRequest request, Long employeeId){
         departmentService.updateDepartment(request, id, employeeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     //부서장 지정/변경
     @PatchMapping("/{id}/head")
     public ResponseEntity<Void> updateDepartmentHead(@PathVariable Long id,@Valid @RequestBody UpdateDepartmentHeadRequest request, Long employeeId){
         departmentService.updateDepartmentHead(request, id, employeeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
