@@ -38,19 +38,28 @@ public class Employee {
         this.rank = rank;
     }
 
-    public static Employee createEmployee(String name, EmployeeStatus status, Team team, Rank rank) {
+    public static Employee createEmployee(String name, Team team, Rank rank) {
         return Employee.builder()
                 .name(name)
-                .status(status)
+                .status(EmployeeStatus.ACTIVE)
                 .team(team)
                 .rank(rank)
                 .build();
     }
 
-    public void updateEmployee(String name, EmployeeStatus status, Team team, Rank rank) {
+    public void updateEmployeeName(String name) {
         this.name = name;
+    }
+
+    public void updateEmployeeStatus(EmployeeStatus status) {
         this.status = status;
+    }
+
+    public void updateEmployeeTeam(Team team) {
         this.team = team;
+    }
+
+    public void updateEmployeeRank(Rank rank) {
         this.rank = rank;
     }
 
