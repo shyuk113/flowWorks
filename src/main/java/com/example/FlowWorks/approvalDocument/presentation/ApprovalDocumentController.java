@@ -41,7 +41,7 @@ public class ApprovalDocumentController {
 
     //기안 내용 수정 (DRAFT 상태에서만)
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateApprovalDocument(@PathVariable Long id, @RequestBody UpdateApprovalDocumentRequest request, Long employeeId){
+    public ResponseEntity<Void> updateApprovalDocument(@PathVariable Long id, @Valid @RequestBody UpdateApprovalDocumentRequest request, Long employeeId){
 
         approvalDocumentService.updateApprovalDocument(request, id, employeeId);
 
