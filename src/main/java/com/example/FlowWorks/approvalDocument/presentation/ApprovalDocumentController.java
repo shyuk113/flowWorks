@@ -4,7 +4,6 @@ import com.example.FlowWorks.approvalDocument.application.ApprovalDocumentServic
 import com.example.FlowWorks.approvalDocument.application.dto.ApprovalDocumentResponse;
 import com.example.FlowWorks.approvalDocument.application.dto.CreateApprovalDocumentRequest;
 import com.example.FlowWorks.approvalDocument.application.dto.UpdateApprovalDocumentRequest;
-import com.example.FlowWorks.approvalDocument.application.dto.UpdateApprovalDocumentStatusRequest;
 import com.example.FlowWorks.approvalDocument.domain.DocumentStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
