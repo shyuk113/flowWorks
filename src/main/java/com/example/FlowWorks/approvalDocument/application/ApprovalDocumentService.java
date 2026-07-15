@@ -6,6 +6,8 @@ import com.example.FlowWorks.approvalDocument.application.dto.UpdateApprovalDocu
 import com.example.FlowWorks.approvalDocument.domain.ApprovalDocument;
 import com.example.FlowWorks.approvalDocument.domain.DocumentStatus;
 import com.example.FlowWorks.approvalDocument.infrastructure.ApprovalDocumentRepository;
+import com.example.FlowWorks.approvalStep.domain.ApprovalStep;
+import com.example.FlowWorks.approvalStep.infrastructure.ApprovalStepRepository;
 import com.example.FlowWorks.employee.domain.Employee;
 import com.example.FlowWorks.employee.infrastructure.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class ApprovalDocumentService {
 
     private final ApprovalDocumentRepository approvalDocumentRepository;
     private final EmployeeRepository employeeRepository;
+    private final ApprovalStepRepository  approvalStepRepository;
 
     private static final int MANAGER_MIN_RANK = 5; //임시 설정
 
@@ -38,7 +41,10 @@ public class ApprovalDocumentService {
     @Transactional(readOnly = true)
     public ApprovalDocumentResponse getDocument(Long id){
         ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 결재입니다."));
-        return ApprovalDocumentResponse.from(approvalDocument);
+
+        List<ApprovalStep> steps = approvalStepRepository.findByApprovalDocumentIdAndRoundNumber(approvalDocument.getId(), approvalDocument.getCurrentRound());
+
+        return ApprovalDocumentResponse.withSteps(approvalDocument, steps);
     }
 
     //기안서 작성 (DRAFT 임시저장)
