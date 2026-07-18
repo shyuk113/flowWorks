@@ -3,6 +3,7 @@ package com.example.FlowWorks.approvalDocument.presentation;
 import com.example.FlowWorks.approvalDocument.application.ApprovalDocumentService;
 import com.example.FlowWorks.approvalDocument.application.dto.ApprovalDocumentResponse;
 import com.example.FlowWorks.approvalDocument.application.dto.CreateApprovalDocumentRequest;
+import com.example.FlowWorks.approvalDocument.application.dto.RejectRequest;
 import com.example.FlowWorks.approvalDocument.application.dto.UpdateApprovalDocumentRequest;
 import com.example.FlowWorks.approvalDocument.domain.DocumentStatus;
 import jakarta.validation.Valid;
@@ -51,6 +52,20 @@ public class ApprovalDocumentController {
     @PostMapping("/{id}/submit")
     public ResponseEntity<Void> submitDocument(@PathVariable Long id, Long drafterId){
         approvalDocumentService.submit(id, drafterId);
+        return ResponseEntity.noContent().build();
+    }
+
+    //기안 승인
+    @PostMapping("/{id}/steps/{stepId}/approve")
+    public ResponseEntity<Void> approveDocument(@PathVariable Long id, @PathVariable Long stepId, Long employeeId){
+        approvalDocumentService.approve(id, stepId, employeeId);
+        return ResponseEntity.noContent().build();
+    }
+
+    //기안 반려
+    @PostMapping("/{id}/steps/{stepId}/reject")
+    public ResponseEntity<Void> rejectDocument(@PathVariable Long id, @PathVariable Long stepId, Long employeeId, @Valid @RequestBody RejectRequest request){
+        approvalDocumentService.reject(id, stepId, employeeId, request.comment());
         return ResponseEntity.noContent().build();
     }
 }
