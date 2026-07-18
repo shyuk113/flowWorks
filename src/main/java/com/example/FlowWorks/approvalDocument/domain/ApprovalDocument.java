@@ -64,4 +64,8 @@ public class ApprovalDocument extends BaseEntity {
         this.status = status;
     }
 
+    public void updateCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+
 }

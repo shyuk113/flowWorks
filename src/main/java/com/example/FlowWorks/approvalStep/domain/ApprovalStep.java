@@ -4,6 +4,7 @@ import com.example.FlowWorks.approvalDocument.domain.ApprovalDocument;
 import com.example.FlowWorks.employee.domain.Employee;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,5 +41,27 @@ public class ApprovalStep {
     private LocalDateTime approvedAt;
 
     private String comment;
+
+    @Builder
+    private ApprovalStep(ApprovalDocument approvalDocument, int roundNumber, int stepOrder, StepType stepType, Employee approver, ApprovalStepStatus status, String comment) {
+        this.approvalDocument = approvalDocument;
+        this.roundNumber = roundNumber;
+        this.stepOrder = stepOrder;
+        this.stepType = stepType;
+        this.approver = approver;
+        this.status = status;
+        this.comment = comment;
+    }
+
+    public static ApprovalStep createStep(ApprovalDocument approvalDocument, int roundNumber, int stepOrder, StepType stepType, Employee approver){
+        return ApprovalStep.builder()
+                .approvalDocument(approvalDocument)
+                .roundNumber(roundNumber)
+                .stepOrder(stepOrder)
+                .stepType(stepType)
+                .approver(approver)
+                .status(ApprovalStepStatus.PENDING)
+                .build();
+    }
 
 }

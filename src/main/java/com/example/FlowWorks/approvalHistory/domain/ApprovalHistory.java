@@ -6,6 +6,7 @@ import com.example.FlowWorks.employee.domain.Employee;
 import com.example.FlowWorks.global.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,5 +36,23 @@ public class ApprovalHistory extends BaseEntity {
 
     private String comment;
 
+    @Builder
+    private ApprovalHistory(ApprovalDocument approvalDocument, ApprovalStep approvalStep, Employee actor, Action action, String comment) {
+        this.approvalDocument = approvalDocument;
+        this.approvalStep = approvalStep;
+        this.actor = actor;
+        this.action = action;
+        this.comment = comment;
+    }
+
+    public static ApprovalHistory createHistory(ApprovalDocument approvalDocument, ApprovalStep approvalStep, Employee actor, Action action, String comment) {
+        return ApprovalHistory.builder()
+                .approvalDocument(approvalDocument)
+                .approvalStep(approvalStep)
+                .actor(actor)
+                .action(action)
+                .comment(comment)
+                .build();
+    }
 
 }
