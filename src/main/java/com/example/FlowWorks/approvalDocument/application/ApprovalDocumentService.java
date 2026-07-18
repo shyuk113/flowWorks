@@ -6,7 +6,11 @@ import com.example.FlowWorks.approvalDocument.application.dto.UpdateApprovalDocu
 import com.example.FlowWorks.approvalDocument.domain.ApprovalDocument;
 import com.example.FlowWorks.approvalDocument.domain.DocumentStatus;
 import com.example.FlowWorks.approvalDocument.infrastructure.ApprovalDocumentRepository;
+import com.example.FlowWorks.approvalHistory.domain.Action;
+import com.example.FlowWorks.approvalHistory.domain.ApprovalHistory;
+import com.example.FlowWorks.approvalHistory.infrastructure.ApprovalHistoryRepository;
 import com.example.FlowWorks.approvalStep.domain.ApprovalStep;
+import com.example.FlowWorks.approvalStep.domain.StepType;
 import com.example.FlowWorks.approvalStep.infrastructure.ApprovalStepRepository;
 import com.example.FlowWorks.employee.domain.Employee;
 import com.example.FlowWorks.employee.infrastructure.EmployeeRepository;
@@ -26,6 +30,7 @@ public class ApprovalDocumentService {
     private final ApprovalStepRepository  approvalStepRepository;
 
     private static final int MANAGER_MIN_RANK = 5; //임시 설정
+    private final ApprovalHistoryRepository approvalHistoryRepository;
 
     //결재문서 목록 조회 (내 기안함/결재함 등 필터)
     @Transactional(readOnly = true)
@@ -77,4 +82,44 @@ public class ApprovalDocumentService {
         approvalDocument.updateApprovalDocument(request.docType(), request.title(), request.content());
     }
 
+    //기안 상신
+    @Transactional
+    public void submit(Long id, Long drafterId){
+
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException(("존재하지 않는 결재입니다.")));
+
+        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 직원입니다."));
+
+        if(!approvalDocument.getDrafter().getId().equals(drafter.getId())){
+            throw new AccessDeniedException("본인의 기안만 상신할 수 있습니다.");
+        }
+
+        if(approvalDocument.getStatus() != DocumentStatus.DRAFT){
+            throw new IllegalStateException("DRAFT상태의 기안만 상신할 수 있습니다.");
+        }
+
+        Employee teamLeader = drafter.getTeam().getTeamLeader();
+        Employee departmentHead = drafter.getTeam().getDepartment().getDepartmentHead();
+
+        if(teamLeader == null){
+            throw new IllegalStateException("팀장이 지정되지 않아 상신할 수 없습니다.");
+        }
+        if(departmentHead == null){
+            throw new IllegalStateException("부서장이 지정되지 않아 상신할 수 없습니다.");
+        }
+
+        approvalDocument.updateApprovalDocumentStatus(DocumentStatus.IN_PROGRESS);
+
+        approvalDocument.updateCurrentRound(approvalDocument.getCurrentRound()+1);
+
+        ApprovalStep step1 = ApprovalStep.createStep(approvalDocument, approvalDocument.getCurrentRound(), 1, StepType.TEAM_LEADER, teamLeader);
+        ApprovalStep step2 = ApprovalStep.createStep(approvalDocument, approvalDocument.getCurrentRound(), 2, StepType.DEPT_HEAD, departmentHead);
+
+        approvalStepRepository.save(step1);
+        approvalStepRepository.save(step2);
+
+        ApprovalHistory history = ApprovalHistory.createHistory(approvalDocument,step1, drafter, Action.SUBMIT,null);
+
+        approvalHistoryRepository.save(history);
+    }
 }

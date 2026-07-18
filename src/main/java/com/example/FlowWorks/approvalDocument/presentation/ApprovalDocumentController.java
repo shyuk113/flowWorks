@@ -46,4 +46,11 @@ public class ApprovalDocumentController {
 
         return ResponseEntity.noContent().build();
     }
+
+    //기안 상신
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<Void> submitDocument(@PathVariable Long id, Long drafterId){
+        approvalDocumentService.submit(id, drafterId);
+        return ResponseEntity.noContent().build();
+    }
 }
