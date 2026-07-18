@@ -64,4 +64,15 @@ public class ApprovalStep {
                 .build();
     }
 
+    public void approve(){
+        this.status = ApprovalStepStatus.APPROVED;
+        this.approvedAt = LocalDateTime.now();
+    }
+
+    public void reject(String comment){
+        this.status = ApprovalStepStatus.REJECTED;
+        this.approvedAt = LocalDateTime.now();
+        this.comment = comment;
+    }
+
 }

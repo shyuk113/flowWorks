@@ -10,6 +10,7 @@ import com.example.FlowWorks.approvalHistory.domain.Action;
 import com.example.FlowWorks.approvalHistory.domain.ApprovalHistory;
 import com.example.FlowWorks.approvalHistory.infrastructure.ApprovalHistoryRepository;
 import com.example.FlowWorks.approvalStep.domain.ApprovalStep;
+import com.example.FlowWorks.approvalStep.domain.ApprovalStepStatus;
 import com.example.FlowWorks.approvalStep.domain.StepType;
 import com.example.FlowWorks.approvalStep.infrastructure.ApprovalStepRepository;
 import com.example.FlowWorks.employee.domain.Employee;
@@ -121,5 +122,85 @@ public class ApprovalDocumentService {
         ApprovalHistory history = ApprovalHistory.createHistory(approvalDocument,step1, drafter, Action.SUBMIT,null);
 
         approvalHistoryRepository.save(history);
+    }
+
+    @Transactional
+    public void approve(Long id, Long stepId, Long employeeId){
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
+        ApprovalStep step = approvalStepRepository.findById(stepId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 단계입니다."));
+
+        if(step.getApprover() == null){
+            throw new IllegalStateException("승인자가 지정되지 않았습니다.");
+        }
+
+        if(approvalDocument.getStatus() != DocumentStatus.IN_PROGRESS){
+            throw new IllegalStateException("진행중인 결재만 승인할 수 있습니다.");
+        }
+
+        if(step.getStatus() != ApprovalStepStatus.PENDING){
+            throw new IllegalStateException("이미 처리된 단계입니다.");
+        }
+
+        if(!step.getApprover().getId().equals(employeeId)){
+            throw new AccessDeniedException("본인에게 배정된 결재만 승인할 수 있습니다.");
+        }
+
+        List<ApprovalStep> roundSteps = approvalStepRepository.findByApprovalDocumentIdAndRoundNumber(id, approvalDocument.getCurrentRound());
+        boolean previousNotApproved = roundSteps.stream().anyMatch(
+                s -> s.getStepOrder() < step.getStepOrder() && s.getStatus() != ApprovalStepStatus.APPROVED
+        );
+
+        if(previousNotApproved){
+            throw new IllegalStateException("이전단계가 아직 승인되지 않았습니다.");
+        }
+
+        step.approve();
+
+        boolean allApproved = roundSteps.stream().allMatch(
+                s->s.getId().equals(step.getId()) || s.getStatus() == ApprovalStepStatus.APPROVED
+        );
+
+        if(allApproved){
+            approvalDocument.updateApprovalDocumentStatus(DocumentStatus.APPROVED);
+        }
+
+        approvalHistoryRepository.save(ApprovalHistory.createHistory(approvalDocument,step,step.getApprover(),Action.APPROVE,null));
+    }
+
+    @Transactional
+    public void reject(Long id, Long stepId, Long employeeId, String comment){
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
+        ApprovalStep step = approvalStepRepository.findById(stepId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 단계입니다."));
+
+        if(step.getApprover() == null) {
+            throw new IllegalStateException("승인자가 지정되지 않았습니다.");
+        }
+
+        if(approvalDocument.getStatus() != DocumentStatus.IN_PROGRESS){
+            throw new IllegalStateException("진행중인 결재만 반려할 수 있습니다.");
+        }
+
+        if(step.getStatus() != ApprovalStepStatus.PENDING){
+            throw new IllegalStateException("이미 처리된 단계입니다.");
+        }
+
+        if(!step.getApprover().getId().equals(employeeId)){
+            throw new AccessDeniedException("본인에게 배정된 결재만 반려할 수 있습니다.");
+        }
+
+        List<ApprovalStep> roundSteps = approvalStepRepository.findByApprovalDocumentIdAndRoundNumber(id, approvalDocument.getCurrentRound());
+        boolean previousNotApproved = roundSteps.stream().anyMatch(
+                s -> s.getStepOrder() < step.getStepOrder() && s.getStatus() != ApprovalStepStatus.APPROVED
+        );
+
+        if(previousNotApproved){
+            throw new IllegalStateException("이전단계가 아직 처리되지 않았습니다.");
+        }
+
+        step.reject(comment);
+
+        approvalDocument.updateApprovalDocumentStatus(DocumentStatus.REJECTED);
+
+        approvalHistoryRepository.save(ApprovalHistory.createHistory(approvalDocument,step,step.getApprover(),Action.REJECT,comment));
     }
 }
