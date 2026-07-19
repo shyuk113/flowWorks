@@ -203,4 +203,44 @@ public class ApprovalDocumentService {
 
         approvalHistoryRepository.save(ApprovalHistory.createHistory(approvalDocument,step,step.getApprover(),Action.REJECT,comment));
     }
+
+    //반려 후 재상신
+    @Transactional
+    public void resubmit(Long id, Long drafterId){
+
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
+
+        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 직원입니다."));
+
+        if(!approvalDocument.getDrafter().getId().equals(drafter.getId())){
+            throw new AccessDeniedException("본인의 기안만 재상신할 수 있습니다.");
+        }
+        if(approvalDocument.getStatus() != DocumentStatus.REJECTED){
+            throw new IllegalStateException("반려된 기안만 재상신 할 수 있습니다.");
+        }
+
+        Employee teamLeader = drafter.getTeam().getTeamLeader();
+        Employee departmentHead = drafter.getTeam().getDepartment().getDepartmentHead();
+
+        if(teamLeader == null){
+            throw new IllegalStateException("팀장이 지정되지 않아 재상신할 수 없습니다.");
+        }
+        if(departmentHead == null){
+            throw new IllegalStateException("부서장이 지정되지 않아 재상신할 수 없습니다.");
+        }
+
+        approvalDocument.updateApprovalDocumentStatus(DocumentStatus.IN_PROGRESS);
+
+        approvalDocument.updateCurrentRound(approvalDocument.getCurrentRound()+1);
+
+        ApprovalStep step1 = ApprovalStep.createStep(approvalDocument, approvalDocument.getCurrentRound(), 1, StepType.TEAM_LEADER, teamLeader);
+        ApprovalStep step2 = ApprovalStep.createStep(approvalDocument, approvalDocument.getCurrentRound(), 2, StepType.DEPT_HEAD, departmentHead);
+
+        approvalStepRepository.save(step1);
+        approvalStepRepository.save(step2);
+
+        ApprovalHistory history = ApprovalHistory.createHistory(approvalDocument,step1, drafter, Action.RESUBMIT,null);
+
+        approvalHistoryRepository.save(history);
+    }
 }
