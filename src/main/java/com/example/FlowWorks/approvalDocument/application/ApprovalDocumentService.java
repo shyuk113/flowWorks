@@ -6,6 +6,7 @@ import com.example.FlowWorks.approvalDocument.application.dto.UpdateApprovalDocu
 import com.example.FlowWorks.approvalDocument.domain.ApprovalDocument;
 import com.example.FlowWorks.approvalDocument.domain.DocumentStatus;
 import com.example.FlowWorks.approvalDocument.infrastructure.ApprovalDocumentRepository;
+import com.example.FlowWorks.approvalHistory.application.dto.ApprovalHistoryResponse;
 import com.example.FlowWorks.approvalHistory.domain.Action;
 import com.example.FlowWorks.approvalHistory.domain.ApprovalHistory;
 import com.example.FlowWorks.approvalHistory.infrastructure.ApprovalHistoryRepository;
@@ -242,5 +243,16 @@ public class ApprovalDocumentService {
         ApprovalHistory history = ApprovalHistory.createHistory(approvalDocument,step1, drafter, Action.RESUBMIT,null);
 
         approvalHistoryRepository.save(history);
+    }
+
+    //이력 조회
+    @Transactional(readOnly = true)
+    public List<ApprovalHistoryResponse> getApprovalHistory(Long id){
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
+
+        List<ApprovalHistoryResponse> history = approvalHistoryRepository.findByApprovalDocumentIdOrderByCreatedAtAsc(id).stream()
+                .map(ApprovalHistoryResponse::from).toList();
+
+        return history;
     }
 }
