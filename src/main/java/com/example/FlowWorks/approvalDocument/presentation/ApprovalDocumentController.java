@@ -6,6 +6,7 @@ import com.example.FlowWorks.approvalDocument.application.dto.CreateApprovalDocu
 import com.example.FlowWorks.approvalDocument.application.dto.RejectRequest;
 import com.example.FlowWorks.approvalDocument.application.dto.UpdateApprovalDocumentRequest;
 import com.example.FlowWorks.approvalDocument.domain.DocumentStatus;
+import com.example.FlowWorks.approvalHistory.application.dto.ApprovalHistoryResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -74,5 +75,11 @@ public class ApprovalDocumentController {
     public ResponseEntity<Void> resubmitDocument(@PathVariable Long id, Long drafterId){
         approvalDocumentService.resubmit(id, drafterId);
         return ResponseEntity.noContent().build();
+    }
+
+    //이력 조회
+    @GetMapping("/{id}/histories")
+    public ResponseEntity<List<ApprovalHistoryResponse>> getApprovalHistory(@PathVariable Long id){
+        return ResponseEntity.ok().body(approvalDocumentService.getApprovalHistory(id));
     }
 }
