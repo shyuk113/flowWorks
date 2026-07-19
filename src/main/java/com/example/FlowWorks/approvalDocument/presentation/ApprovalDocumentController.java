@@ -68,4 +68,11 @@ public class ApprovalDocumentController {
         approvalDocumentService.reject(id, stepId, employeeId, request.comment());
         return ResponseEntity.noContent().build();
     }
+
+    //반려 후 재상신
+    @PostMapping("/{id}/resubmit")
+    public ResponseEntity<Void> resubmitDocument(@PathVariable Long id, Long drafterId){
+        approvalDocumentService.resubmit(id, drafterId);
+        return ResponseEntity.noContent().build();
+    }
 }
