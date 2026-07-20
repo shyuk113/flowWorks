@@ -17,6 +17,11 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private String email;
+
+    private String password;
+
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -31,15 +36,19 @@ public class Employee {
     private Rank rank;
 
     @Builder
-    private Employee(String name, EmployeeStatus status, Team team, Rank rank) {
+    private Employee(String email, String password, String name, EmployeeStatus status, Team team, Rank rank) {
+        this.email = email;
+        this.password = password;
         this.name = name;
         this.status = status;
         this.team = team;
         this.rank = rank;
     }
 
-    public static Employee createEmployee(String name, Team team, Rank rank) {
+    public static Employee createEmployee(String email, String password, String name, Team team, Rank rank) {
         return Employee.builder()
+                .email(email)
+                .password(password)
                 .name(name)
                 .status(EmployeeStatus.ACTIVE)
                 .team(team)

@@ -9,6 +9,7 @@ import com.example.FlowWorks.team.domain.Team;
 import com.example.FlowWorks.team.infrastructure.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class EmployeeService {
     private final RankRepository rankRepository;
 
     private static final int MANAGER_MIN_RANK = 5;
+    private final PasswordEncoder passwordEncoder;
 
     //직원 목록 조회
     @Transactional(readOnly = true)
@@ -47,11 +49,15 @@ public class EmployeeService {
             throw new AccessDeniedException("직원 생성 권한이 없습니다.");
         }
 
+        if(employeeRepository.existsByEmail(request.email())){
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+        }
+
         Team team = teamRepository.findById(request.teamId()).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 팀입니다."));
 
         Rank rank = rankRepository.findById(request.rankId()).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 직급입니다."));
 
-        Employee employee = Employee.createEmployee(request.name(), team, rank);
+        Employee employee = Employee.createEmployee(request.email(), passwordEncoder.encode(request.password()), request.name(), team, rank);
 
         employeeRepository.save(employee);
 
