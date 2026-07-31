@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,13 +37,13 @@ public class ApprovalDocumentController {
 
     //기안서 작성 (DRAFT 임시저장)
     @PostMapping
-    public ResponseEntity<ApprovalDocumentResponse> createApprovalDocument(@Valid @RequestBody CreateApprovalDocumentRequest request, Long drafterId){
+    public ResponseEntity<ApprovalDocumentResponse> createApprovalDocument(@Valid @RequestBody CreateApprovalDocumentRequest request, @AuthenticationPrincipal Long drafterId){
         return ResponseEntity.status(HttpStatus.CREATED).body(approvalDocumentService.createApprovalDocument(request, drafterId));
     }
 
     //기안 내용 수정 (DRAFT 상태에서만)
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateApprovalDocument(@PathVariable Long id, @Valid @RequestBody UpdateApprovalDocumentRequest request, Long employeeId){
+    public ResponseEntity<Void> updateApprovalDocument(@PathVariable Long id, @Valid @RequestBody UpdateApprovalDocumentRequest request, @AuthenticationPrincipal Long employeeId){
 
         approvalDocumentService.updateApprovalDocument(request, id, employeeId);
 
@@ -51,28 +52,28 @@ public class ApprovalDocumentController {
 
     //기안 상신
     @PostMapping("/{id}/submit")
-    public ResponseEntity<Void> submitDocument(@PathVariable Long id, Long drafterId){
+    public ResponseEntity<Void> submitDocument(@PathVariable Long id, @AuthenticationPrincipal Long drafterId){
         approvalDocumentService.submit(id, drafterId);
         return ResponseEntity.noContent().build();
     }
 
     //기안 승인
     @PostMapping("/{id}/steps/{stepId}/approve")
-    public ResponseEntity<Void> approveDocument(@PathVariable Long id, @PathVariable Long stepId, Long employeeId){
+    public ResponseEntity<Void> approveDocument(@PathVariable Long id, @PathVariable Long stepId, @AuthenticationPrincipal Long employeeId){
         approvalDocumentService.approve(id, stepId, employeeId);
         return ResponseEntity.noContent().build();
     }
 
     //기안 반려
     @PostMapping("/{id}/steps/{stepId}/reject")
-    public ResponseEntity<Void> rejectDocument(@PathVariable Long id, @PathVariable Long stepId, Long employeeId, @Valid @RequestBody RejectRequest request){
+    public ResponseEntity<Void> rejectDocument(@PathVariable Long id, @PathVariable Long stepId, @AuthenticationPrincipal Long employeeId, @Valid @RequestBody RejectRequest request){
         approvalDocumentService.reject(id, stepId, employeeId, request.comment());
         return ResponseEntity.noContent().build();
     }
 
     //반려 후 재상신
     @PostMapping("/{id}/resubmit")
-    public ResponseEntity<Void> resubmitDocument(@PathVariable Long id, Long drafterId){
+    public ResponseEntity<Void> resubmitDocument(@PathVariable Long id, @AuthenticationPrincipal Long drafterId){
         approvalDocumentService.resubmit(id, drafterId);
         return ResponseEntity.noContent().build();
     }

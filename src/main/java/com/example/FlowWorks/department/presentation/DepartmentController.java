@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +20,6 @@ import java.util.List;
 public class DepartmentController {
 
     private final DepartmentService departmentService;
-
-    //TODO:임시 조치, Security 붙기 전까지
 
     //부서 목록 조회
     @GetMapping
@@ -36,20 +35,20 @@ public class DepartmentController {
 
     //부서 생성
     @PostMapping
-    public ResponseEntity<DepartmentResponse> createDepartment(@Valid @RequestBody CreateDepartmentRequest request, Long employeeId){
+    public ResponseEntity<DepartmentResponse> createDepartment(@Valid @RequestBody CreateDepartmentRequest request, @AuthenticationPrincipal Long employeeId){
         return ResponseEntity.status(HttpStatus.CREATED).body(departmentService.addDepartment(request, employeeId));
     }
 
     //부서명 등 기본 정보 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<Void>  updateDepartment(@PathVariable Long id,@Valid @RequestBody UpdateDepartmentRequest request, Long employeeId){
+    public ResponseEntity<Void>  updateDepartment(@PathVariable Long id,@Valid @RequestBody UpdateDepartmentRequest request, @AuthenticationPrincipal Long employeeId){
         departmentService.updateDepartment(request, id, employeeId);
         return ResponseEntity.noContent().build();
     }
 
     //부서장 지정/변경
     @PatchMapping("/{id}/head")
-    public ResponseEntity<Void> updateDepartmentHead(@PathVariable Long id,@Valid @RequestBody UpdateDepartmentHeadRequest request, Long employeeId){
+    public ResponseEntity<Void> updateDepartmentHead(@PathVariable Long id,@Valid @RequestBody UpdateDepartmentHeadRequest request, @AuthenticationPrincipal Long employeeId){
         departmentService.updateDepartmentHead(request, id, employeeId);
         return ResponseEntity.noContent().build();
     }

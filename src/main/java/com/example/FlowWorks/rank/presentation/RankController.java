@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,13 +28,13 @@ public class RankController {
 
     //직급 생성
     @PostMapping
-    public ResponseEntity<RankResponse> createRank(@Valid @RequestBody CreateRankRequest request, Long employeeId){
+    public ResponseEntity<RankResponse> createRank(@Valid @RequestBody CreateRankRequest request, @AuthenticationPrincipal Long employeeId){
         return ResponseEntity.status(HttpStatus.CREATED).body(rankService.createRank(request, employeeId));
     }
 
     //직급명/레벨 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateRank(@PathVariable Long id, @Valid @RequestBody UpdateRankRequest request, Long employeeId){
+    public ResponseEntity<Void> updateRank(@PathVariable Long id, @Valid @RequestBody UpdateRankRequest request, @AuthenticationPrincipal Long employeeId){
         rankService.updateRank(request, id, employeeId);
         return ResponseEntity.noContent().build();
     }
