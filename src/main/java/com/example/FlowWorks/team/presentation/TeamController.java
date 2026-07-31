@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +20,6 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
-
-    //TODO: employee 임시 설정 나중에 @AuthenticationPriciple 적용예정
 
     //팀 목록 조회
     @GetMapping
@@ -36,20 +35,20 @@ public class TeamController {
 
     //팀 생성
     @PostMapping
-    public ResponseEntity<TeamResponse> createTeam(@Valid @RequestBody CreateTeamRequest request, Long employeeId){
+    public ResponseEntity<TeamResponse> createTeam(@Valid @RequestBody CreateTeamRequest request, @AuthenticationPrincipal Long employeeId){
         return ResponseEntity.status(HttpStatus.CREATED).body(teamService.createTeam(request, employeeId));
     }
 
     //팀명 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateTeamName(@PathVariable Long id,@Valid @RequestBody UpdateTeamNameRequest request, Long employeeId){
+    public ResponseEntity<Void> updateTeamName(@PathVariable Long id,@Valid @RequestBody UpdateTeamNameRequest request, @AuthenticationPrincipal Long employeeId){
         teamService.updateTeamName(request, id, employeeId);
         return ResponseEntity.noContent().build();
     }
 
     //팀장 지정 및 수정
     @PatchMapping("/{id}/leader")
-    public ResponseEntity<Void> updateTeamLeader(@PathVariable Long id,@Valid @RequestBody UpdateTeamLeaderRequest request, Long employeeId){
+    public ResponseEntity<Void> updateTeamLeader(@PathVariable Long id,@Valid @RequestBody UpdateTeamLeaderRequest request, @AuthenticationPrincipal Long employeeId){
         teamService.updateTeamLeader(request, id, employeeId);
         return ResponseEntity.noContent().build();
     }
