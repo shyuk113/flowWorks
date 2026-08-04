@@ -16,6 +16,7 @@ import com.example.FlowWorks.approvalStep.domain.StepType;
 import com.example.FlowWorks.approvalStep.infrastructure.ApprovalStepRepository;
 import com.example.FlowWorks.employee.domain.Employee;
 import com.example.FlowWorks.employee.infrastructure.EmployeeRepository;
+import com.example.FlowWorks.global.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,7 @@ public class ApprovalDocumentService {
     //결재문서 상세 조회 (현재 라운드 결재선 포함)
     @Transactional(readOnly = true)
     public ApprovalDocumentResponse getDocument(Long id){
-        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 결재입니다."));
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 결재입니다."));
 
         List<ApprovalStep> steps = approvalStepRepository.findByApprovalDocumentIdAndRoundNumber(approvalDocument.getId(), approvalDocument.getCurrentRound());
 
@@ -58,7 +59,7 @@ public class ApprovalDocumentService {
     @Transactional
     public ApprovalDocumentResponse createApprovalDocument(CreateApprovalDocumentRequest request, Long drafterId){
 
-        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 직원입니다."));
+        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()->new EntityNotFoundException("존재하지 않는 직원입니다."));
 
         ApprovalDocument approvalDocument = ApprovalDocument.createApprovalDocument(request.docType(), request.title(), request.content(), drafter);
 
@@ -71,7 +72,7 @@ public class ApprovalDocumentService {
     @Transactional
     public void updateApprovalDocument(UpdateApprovalDocumentRequest request, Long targetId, Long drafterId){
 
-        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(targetId).orElseThrow(()-> new IllegalArgumentException(("존재하지 않는 결재입니다.")));
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(targetId).orElseThrow(()-> new EntityNotFoundException(("존재하지 않는 결재입니다.")));
 
         if(!approvalDocument.getDrafter().getId().equals(drafterId)){
             throw new AccessDeniedException("기안 수정 권한이 없습니다.");
@@ -88,9 +89,9 @@ public class ApprovalDocumentService {
     @Transactional
     public void submit(Long id, Long drafterId){
 
-        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException(("존재하지 않는 결재입니다.")));
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 결재입니다."));
 
-        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 직원입니다."));
+        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 직원입니다."));
 
         if(!approvalDocument.getDrafter().getId().equals(drafter.getId())){
             throw new AccessDeniedException("본인의 기안만 상신할 수 있습니다.");
@@ -127,8 +128,8 @@ public class ApprovalDocumentService {
 
     @Transactional
     public void approve(Long id, Long stepId, Long employeeId){
-        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
-        ApprovalStep step = approvalStepRepository.findById(stepId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 단계입니다."));
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 기안입니다."));
+        ApprovalStep step = approvalStepRepository.findById(stepId).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 단계입니다."));
 
         if(step.getApprover() == null){
             throw new IllegalStateException("승인자가 지정되지 않았습니다.");
@@ -170,8 +171,8 @@ public class ApprovalDocumentService {
 
     @Transactional
     public void reject(Long id, Long stepId, Long employeeId, String comment){
-        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
-        ApprovalStep step = approvalStepRepository.findById(stepId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 단계입니다."));
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 기안입니다."));
+        ApprovalStep step = approvalStepRepository.findById(stepId).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 단계입니다."));
 
         if(step.getApprover() == null) {
             throw new IllegalStateException("승인자가 지정되지 않았습니다.");
@@ -209,9 +210,9 @@ public class ApprovalDocumentService {
     @Transactional
     public void resubmit(Long id, Long drafterId){
 
-        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 기안입니다."));
 
-        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 직원입니다."));
+        Employee drafter = employeeRepository.findById(drafterId).orElseThrow(()->new EntityNotFoundException("존재하지 않는 직원입니다."));
 
         if(!approvalDocument.getDrafter().getId().equals(drafter.getId())){
             throw new AccessDeniedException("본인의 기안만 재상신할 수 있습니다.");
@@ -248,7 +249,7 @@ public class ApprovalDocumentService {
     //이력 조회
     @Transactional(readOnly = true)
     public List<ApprovalHistoryResponse> getApprovalHistory(Long id){
-        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 기안입니다."));
+        ApprovalDocument approvalDocument = approvalDocumentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 기안입니다."));
 
         List<ApprovalHistoryResponse> history = approvalHistoryRepository.findByApprovalDocumentIdOrderByCreatedAtAsc(id).stream()
                 .map(ApprovalHistoryResponse::from).toList();
